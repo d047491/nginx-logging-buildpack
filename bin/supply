@@ -20,7 +20,7 @@ t='{"written_at":"$time_iso8601",
 "component_id":"-",
 "component_name":"-",
 "component_type":"service",
-"component_instance":"-",
+"component_instance":"0",
 "organization_id":"-",
 "organization_name":"-",
 "space_id":"-",
@@ -35,14 +35,12 @@ cf_log_format=$(echo "$t" | jq -r \
     --arg b "$(fromVCAP .application_name)" \
     --arg c "$(fromVCAP .organization_id)" \
     --arg d "$(fromVCAP .organization_name)" \
-    --arg e "$CF_INSTANCE_INDEX" \
     --arg f "$(fromVCAP .space_id)" \
     --arg g "$(fromVCAP .space_name)" \
     '.component_id=$a | 
     .component_name = $b | 
     .organization_id = $c |
     .organization_name = $d |
-    .component_instance = $e |
     .space_id = $f |
     .space_name =$g |
     tostring
