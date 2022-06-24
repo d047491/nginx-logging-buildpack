@@ -1,0 +1,52 @@
+#!/bin/bash
+
+set -euo pipefail
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+DEPS_DIR=$3
+DEPS_IDX=$4
+
+echo "-----> Running nginx log format supply"
+
+
+fromVCAP() {
+    echo "$VCAP_APPLICATION" | jq -r "$1"
+}
+
+t='{"written_at":"$time_iso8601",
+"written_ts":"$msec",
+"correlation_id":"$http_x_correlationid",
+"component_id":"-",
+"component_name":"-",
+"component_type":"service",
+"component_instance":"-",
+"organization_id":"-",
+"organization_name":"-",
+"space_id":"-",
+"space_name":"-",
+"type":"log",
+"logger":"nginxlogger",
+"level":"$log_level",
+"msg":"$log_msg"}'
+
+cf_log_format=$(echo "$t" | jq -r \
+    --arg a "$(fromVCAP .application_id)" \
+    --arg b "$(fromVCAP .application_name)" \
+    --arg c "$(fromVCAP .organization_id)" \
+    --arg d "$(fromVCAP .organization_name)" \
+    --arg e "$CF_INSTANCE_INDEX" \
+    --arg f "$(fromVCAP .space_id)" \
+    --arg g "$(fromVCAP .space_name)" \
+    '.component_id=$a | 
+    .component_name = $b | 
+    .organization_id = $c |
+    .organization_name = $d |
+    .component_instance = $e |
+    .space_id = $f |
+    .space_name =$g |
+    tostring
+    ')
+
+
+echo "log_format cf_log escape=json '${cf_log_format}';" > $BUILD_DIR/cf-log.conf
