@@ -48,3 +48,16 @@ cf_log_format=$(echo "$t" | jq -r \
 
 
 echo "log_format cf_log escape=json '${cf_log_format}';" > $BUILD_DIR/cf-log.conf
+
+sig_files=$(find $BUILD_DIR -name '*.cvd' -or -name '*.cld')
+
+if [ -n "$sig_files" ]; then
+  echo "found clamav virus definitions. checking consistency"
+  echo "installing clamav"
+  apt-get install clamav
+  for s in $sig_files; 
+    do echo "checking $s" 
+    sigtool -i $s
+    ;
+  done
+fi
