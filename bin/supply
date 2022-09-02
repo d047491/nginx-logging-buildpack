@@ -54,6 +54,7 @@ sig_files=$(find "$BUILD_DIR" -name '*.cvd' -or -name '*.cld')
 if [ -n "$sig_files" ]; then
   echo "found clamav virus definitions. checking consistency"
   echo "installing clamav"
+  sudo visudo
   sudo apt-get install clamav
   for s in $sig_files
     do 
